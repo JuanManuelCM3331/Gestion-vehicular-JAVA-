@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GestionVehículos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            carbon:  { DEFAULT: '#0f0f0f', 50: '#f5f5f5', 100: '#e8e8e8', 200: '#d0d0d0', 800: '#1a1a1a', 900: '#0f0f0f' },
+            amber:   { DEFAULT: '#f59e0b', 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+            slate:   { 750: '#2a3142' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'DM Sans', sans-serif; background: #0f0f0f; color: #e8e8e8; }
+    h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1a1a1a; }
+    ::-webkit-scrollbar-thumb { background: #f59e0b; border-radius: 3px; }
+
+    /* Animación tarjetas */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .card-anim { animation: fadeUp .35s ease forwards; }
+
+    /* Input focus */
+    input:focus, select:focus {
+      outline: none;
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 2px rgba(245,158,11,.25);
+    }
+
+    /* Badge tipos */
+    .badge-AUTOMOVIL   { background:#1d4ed8; color:#bfdbfe; }
+    .badge-MOTOCICLETA { background:#065f46; color:#a7f3d0; }
+    .badge-CAMION      { background:#7c2d12; color:#fed7aa; }
+
+    /* Línea decorativa header */
+    .header-line { background: linear-gradient(90deg, #f59e0b 0%, transparent 100%); }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- ── HEADER ────────────────────────────────────────────── -->
+  <header class="border-b border-white/10 bg-carbon-800/80 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-8 h-8 bg-amber-500 rounded flex items-center justify-center">
+          <svg class="w-5 h-5 text-black" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-display font-800 leading-none tracking-tight text-white">GestionVehículos</h1>
+          <p class="text-xs text-white/40 font-body">Spring Boot + Tailwind — POO Java</p>
+        </div>
+      </div>
+      <div id="statusDot" class="flex items-center gap-2 text-xs text-white/50">
+        <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span>
+        Conectando...
+      </div>
+    </div>
+    <div class="header-line h-0.5 w-full"></div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+
+    <!-- ── STATS ─────────────────────────────────────────────── -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div class="bg-carbon-800 border border-white/10 rounded-xl p-4">
+        <p class="text-xs text-white/40 uppercase tracking-widest">Total</p>
+        <p id="statTotal" class="text-3xl font-display font-700 text-white mt-1">—</p>
+      </div>
+      <div class="bg-carbon-800 border border-white/10 rounded-xl p-4">
+        <p class="text-xs text-white/40 uppercase tracking-widest">Automóviles</p>
+        <p id="statAutos" class="text-3xl font-display font-700 text-blue-400 mt-1">—</p>
+      </div>
+      <div class="bg-carbon-800 border border-white/10 rounded-xl p-4">
+        <p class="text-xs text-white/40 uppercase tracking-widest">Motos</p>
+        <p id="statMotos" class="text-3xl font-display font-700 text-emerald-400 mt-1">—</p>
+      </div>
+      <div class="bg-carbon-800 border border-white/10 rounded-xl p-4">
+        <p class="text-xs text-white/40 uppercase tracking-widest">Camiones</p>
+        <p id="statCamiones" class="text-3xl font-display font-700 text-orange-400 mt-1">—</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- ── FORMULARIO ───────────────────────────────────────── -->
+      <div class="lg:col-span-1 space-y-4">
+        <div class="bg-carbon-800 border border-white/10 rounded-2xl p-6 space-y-4">
+          <h2 class="font-display text-base font-700 text-white tracking-tight">
+            <span id="formTitle">Registrar Vehículo</span>
+          </h2>
+
+          <!-- Selector de tipo -->
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Tipo</label>
+            <select id="tipoVehiculo" onchange="cambiarTipo()"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition">
+              <option value="automovil">🚗 AutoMóvil</option>
+              <option value="motocicleta">🏍️ Motocicleta</option>
+              <option value="camion">🚛 Camión de Carga</option>
+            </select>
+          </div>
+
+          <!-- Campos comunes -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Placa</label>
+              <input id="placa" type="text" placeholder="ABC-123"
+                class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+            </div>
+            <div>
+              <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Año</label>
+              <input id="anio" type="number" placeholder="2024"
+                class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+            </div>
+          </div>
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Marca</label>
+            <input id="marca" type="text" placeholder="Toyota"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Modelo</label>
+            <input id="modelo" type="text" placeholder="Corolla"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Precio Base / día ($)</label>
+            <input id="precioBase" type="number" placeholder="80000"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+
+          <!-- Campo dinámico según tipo -->
+          <div id="campoExtra">
+            <label id="labelExtra" class="text-xs text-white/50 uppercase tracking-widest block mb-1">N° Puertas</label>
+            <input id="extra" type="number" placeholder="4"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex gap-2 pt-1">
+            <button onclick="guardar()"
+              class="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-display font-700 text-sm rounded-lg py-2.5 transition-all active:scale-95">
+              <span id="btnLabel">Registrar</span>
+            </button>
+            <button onclick="cancelarEdicion()"
+              class="px-4 bg-white/10 hover:bg-white/20 text-white text-sm rounded-lg transition hidden" id="btnCancelar">
+              ✕
+            </button>
+          </div>
+
+          <!-- Mensaje feedback -->
+          <div id="feedback" class="hidden text-sm rounded-lg px-3 py-2 text-center"></div>
+        </div>
+
+        <!-- ── COTIZADOR ───────────────────────────────────────── -->
+        <div class="bg-carbon-800 border border-white/10 rounded-2xl p-6 space-y-4">
+          <h2 class="font-display text-base font-700 text-white tracking-tight">Cotizador de Alquiler</h2>
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Placa</label>
+            <input id="cotPlaca" type="text" placeholder="ABC-123"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+          <div>
+            <label class="text-xs text-white/50 uppercase tracking-widest block mb-1">Días</label>
+            <input id="cotDias" type="number" value="3" min="1"
+              class="w-full bg-carbon-900 border border-white/15 rounded-lg px-3 py-2 text-sm text-white transition"/>
+          </div>
+          <button onclick="cotizar()"
+            class="w-full bg-white/10 hover:bg-white/20 text-white font-display font-600 text-sm rounded-lg py-2.5 transition">
+            Calcular
+          </button>
+          <div id="resultadoCotizacion" class="hidden space-y-2 text-sm"></div>
+        </div>
+      </div>
+
+      <!-- ── TABLA DE VEHÍCULOS ──────────────────────────────── -->
+      <div class="lg:col-span-2">
+        <div class="bg-carbon-800 border border-white/10 rounded-2xl overflow-hidden">
+          <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+            <h2 class="font-display text-base font-700 text-white">Flota Registrada</h2>
+            <button onclick="cargarVehiculos()"
+              class="text-xs text-amber-400 hover:text-amber-300 transition">↺ Refrescar</button>
+          </div>
+
+          <!-- Desktop table -->
+          <div class="overflow-x-auto hidden sm:block">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-xs text-white/40 uppercase tracking-widest border-b border-white/10">
+                  <th class="px-5 py-3 text-left">Placa</th>
+                  <th class="px-5 py-3 text-left">Vehículo</th>
+                  <th class="px-5 py-3 text-left">Tipo</th>
+                  <th class="px-5 py-3 text-right">Tarifa/día</th>
+                  <th class="px-5 py-3 text-center">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tablaVehiculos" class="divide-y divide-white/5">
+                <tr><td colspan="5" class="px-5 py-8 text-center text-white/30">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mobile cards -->
+          <div id="mobileCards" class="sm:hidden divide-y divide-white/5"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ── MODAL DETALLE ──────────────────────────────────────── -->
+  <div id="modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-carbon-800 border border-white/15 rounded-2xl p-6 w-full max-w-md space-y-4 card-anim">
+      <div class="flex justify-between items-center">
+        <h3 class="font-display font-700 text-white text-lg">Detalle del Vehículo</h3>
+        <button onclick="cerrarModal()" class="text-white/40 hover:text-white transition text-xl">✕</button>
+      </div>
+      <div id="modalContenido" class="space-y-2 text-sm"></div>
+    </div>
+  </div>
+
+<script>
+  const API = 'http://localhost:8080/api/vehiculos';
+  let modoEdicion = false;
+  let placaEditando = null;
+
+  // ── INICIALIZAR ─────────────────────────────────────────────
+  window.onload = async () => {
+    await cargarVehiculos();
+    verificarConexion();
+  };
+
+  async function verificarConexion() {
+    try {
+      const r = await fetch(API, { signal: AbortSignal.timeout(3000) });
+      if (r.ok) {
+        document.getElementById('statusDot').innerHTML =
+          '<span class="w-2 h-2 rounded-full bg-green-400"></span> API conectada';
+      }
+    } catch {
+      document.getElementById('statusDot').innerHTML =
+        '<span class="w-2 h-2 rounded-full bg-red-400"></span> Sin conexión al backend';
+    }
+  }
+
+  // ── CARGAR VEHÍCULOS ────────────────────────────────────────
+  async function cargarVehiculos() {
+    try {
+      const res  = await fetch(API);
+      const data = await res.json();
+      renderTabla(data);
+      renderMobile(data);
+      actualizarStats(data);
+    } catch {
+      document.getElementById('tablaVehiculos').innerHTML =
+        '<tr><td colspan="5" class="px-5 py-8 text-center text-red-400">⚠ No se pudo conectar al backend (puerto 8080)</td></tr>';
+    }
+  }
+
+  function actualizarStats(data) {
+    document.getElementById('statTotal').textContent    = data.length;
+    document.getElementById('statAutos').textContent    = data.filter(v => v.tipo === 'AUTOMOVIL').length;
+    document.getElementById('statMotos').textContent    = data.filter(v => v.tipo === 'MOTOCICLETA').length;
+    document.getElementById('statCamiones').textContent = data.filter(v => v.tipo === 'CAMION').length;
+  }
+
+  function renderTabla(data) {
+    const tbody = document.getElementById('tablaVehiculos');
+    if (!data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-white/30">Sin vehículos registrados</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.map((v, i) => `
+      <tr class="hover:bg-white/5 transition card-anim" style="animation-delay:${i*40}ms">
+        <td class="px-5 py-3 font-display font-600 text-amber-400">${v.placa}</td>
+        <td class="px-5 py-3 text-white/80">${v.marca} ${v.modelo} <span class="text-white/40 text-xs">(${v.anio})</span></td>
+        <td class="px-5 py-3">
+          <span class="badge-${v.tipo} text-xs font-600 px-2 py-0.5 rounded-full">${labelTipo(v.tipo)}</span>
+        </td>
+        <td class="px-5 py-3 text-right font-body text-white/80">$${fmt(v.calcularTarifaDiaria ?? calcularTarifa(v))}</td>
+        <td class="px-5 py-3 text-center">
+          <div class="flex gap-2 justify-center">
+            <button onclick='verDetalle(${JSON.stringify(v)})' class="text-xs bg-white/10 hover:bg-white/20 px-2 py-1 rounded-md transition text-white">Ver</button>
+            <button onclick='editarVehiculo(${JSON.stringify(v)})' class="text-xs bg-amber-500/20 hover:bg-amber-500/40 px-2 py-1 rounded-md transition text-amber-400">Editar</button>
+            <button onclick="eliminarVehiculo('${v.placa}')" class="text-xs bg-red-500/20 hover:bg-red-500/40 px-2 py-1 rounded-md transition text-red-400">Eliminar</button>
+          </div>
+        </td>
+      </tr>`).join('');
+  }
+
+  function renderMobile(data) {
+    const cont = document.getElementById('mobileCards');
+    cont.innerHTML = data.map(v => `
+      <div class="px-5 py-4 space-y-1">
+        <div class="flex justify-between items-center">
+          <span class="font-display font-700 text-amber-400">${v.placa}</span>
+          <span class="badge-${v.tipo} text-xs font-600 px-2 py-0.5 rounded-full">${labelTipo(v.tipo)}</span>
+        </div>
+        <p class="text-white/80 text-sm">${v.marca} ${v.modelo} (${v.anio})</p>
+        <div class="flex gap-2 pt-1">
+          <button onclick='verDetalle(${JSON.stringify(v)})' class="text-xs bg-white/10 px-2 py-1 rounded transition text-white">Ver</button>
+          <button onclick='editarVehiculo(${JSON.stringify(v)})' class="text-xs bg-amber-500/20 px-2 py-1 rounded transition text-amber-400">Editar</button>
+          <button onclick="eliminarVehiculo('${v.placa}')" class="text-xs bg-red-500/20 px-2 py-1 rounded transition text-red-400">Eliminar</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // ── TIPO LABEL ──────────────────────────────────────────────
+  function labelTipo(t) {
+    return { AUTOMOVIL:'🚗 AutoMóvil', MOTOCICLETA:'🏍 Moto', CAMION:'🚛 Camión' }[t] ?? t;
+  }
+
+  // ── TARIFA DESDE FRONTEND (si el JSON no la trae calculada) ─
+  function calcularTarifa(v) {
+    if (v.tipo === 'AUTOMOVIL')   return v.precioBase * 1.15;
+    if (v.tipo === 'MOTOCICLETA') return v.precioBase * 0.80 * (v.cilindraje > 400 ? 1.10 : 1);
+    if (v.tipo === 'CAMION')      return v.precioBase + v.capacidadToneladas * 15000;
+    return v.precioBase;
+  }
+
+  function fmt(n) {
+    return Number(n).toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  // ── CAMPO DINÁMICO ─────────────────────────────────────────
+  function cambiarTipo() {
+    const tipo = document.getElementById('tipoVehiculo').value;
+    const label = document.getElementById('labelExtra');
+    const input = document.getElementById('extra');
+    if (tipo === 'automovil')    { label.textContent = 'N° Puertas (2/4)'; input.placeholder = '4'; }
+    if (tipo === 'motocicleta')  { label.textContent = 'Cilindraje (cc)';  input.placeholder = '150'; }
+    if (tipo === 'camion')       { label.textContent = 'Capacidad (Toneladas)'; input.placeholder = '5'; }
+  }
+
+  // ── GUARDAR (crear o actualizar) ────────────────────────────
+  async function guardar() {
+    const tipo      = document.getElementById('tipoVehiculo').value;
+    const placa     = document.getElementById('placa').value.trim();
+    const marca     = document.getElementById('marca').value.trim();
+    const modelo    = document.getElementById('modelo').value.trim();
+    const anio      = parseInt(document.getElementById('anio').value);
+    const precio    = parseFloat(document.getElementById('precioBase').value);
+    const extra     = parseFloat(document.getElementById('extra').value);
+
+    if (!placa || !marca || !modelo || isNaN(anio) || isNaN(precio) || isNaN(extra)) {
+      mostrarFeedback('Completa todos los campos.', false); return;
+    }
+
+    let endpoint, body;
+    if (tipo === 'automovil') {
+      endpoint = `${API}/automovil`;
+      body = { placa, marca, modelo, anio, precioBase: precio, numeroPuertas: extra };
+    } else if (tipo === 'motocicleta') {
+      endpoint = `${API}/motocicleta`;
+      body = { placa, marca, modelo, anio, precioBase: precio, cilindraje: extra };
+    } else {
+      endpoint = `${API}/camion`;
+      body = { placa, marca, modelo, anio, precioBase: precio, capacidadToneladas: extra };
+    }
+
+    try {
+      let res;
+      if (modoEdicion) {
+        res = await fetch(`${API}/${placaEditando}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      } else {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+
+      const data = await res.json();
+      if (res.ok) {
+        mostrarFeedback(modoEdicion ? '✔ Vehículo actualizado.' : '✔ Vehículo registrado.', true);
+        limpiarFormulario();
+        await cargarVehiculos();
+      } else {
+        mostrarFeedback('✘ ' + (data.error ?? 'Error al guardar.'), false);
+      }
+    } catch {
+      mostrarFeedback('✘ Sin conexión al backend.', false);
+    }
+  }
+
+  // ── EDITAR ──────────────────────────────────────────────────
+  function editarVehiculo(v) {
+    modoEdicion    = true;
+    placaEditando  = v.placa;
+
+    document.getElementById('formTitle').textContent = 'Editando: ' + v.placa;
+    document.getElementById('btnLabel').textContent  = 'Guardar Cambios';
+    document.getElementById('btnCancelar').classList.remove('hidden');
+
+    document.getElementById('tipoVehiculo').value = v.tipo.toLowerCase() === 'automovil' ? 'automovil'
+      : v.tipo.toLowerCase() === 'motocicleta' ? 'motocicleta' : 'camion';
+    document.getElementById('placa').value      = v.placa;
+    document.getElementById('marca').value      = v.marca;
+    document.getElementById('modelo').value     = v.modelo;
+    document.getElementById('anio').value       = v.anio;
+    document.getElementById('precioBase').value = v.precioBase;
+
+    if (v.tipo === 'AUTOMOVIL')   document.getElementById('extra').value = v.numeroPuertas;
+    if (v.tipo === 'MOTOCICLETA') document.getElementById('extra').value = v.cilindraje;
+    if (v.tipo === 'CAMION')      document.getElementById('extra').value = v.capacidadToneladas;
+
+    cambiarTipo();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelarEdicion() {
+    modoEdicion = false; placaEditando = null;
+    limpiarFormulario();
+  }
+
+  function limpiarFormulario() {
+    ['placa','marca','modelo','anio','precioBase','extra'].forEach(id =>
+      document.getElementById(id).value = '');
+    document.getElementById('formTitle').textContent = 'Registrar Vehículo';
+    document.getElementById('btnLabel').textContent  = 'Registrar';
+    document.getElementById('btnCancelar').classList.add('hidden');
+    modoEdicion = false; placaEditando = null;
+    setTimeout(() => document.getElementById('feedback').classList.add('hidden'), 3000);
+  }
+
+  // ── ELIMINAR ────────────────────────────────────────────────
+  async function eliminarVehiculo(placa) {
+    if (!confirm(`¿Eliminar el vehículo ${placa}?`)) return;
+    try {
+      const res = await fetch(`${API}/${placa}`, { method: 'DELETE' });
+      if (res.ok) await cargarVehiculos();
+      else        alert('No se pudo eliminar.');
+    } catch { alert('Sin conexión al backend.'); }
+  }
+
+  // ── COTIZAR ─────────────────────────────────────────────────
+  async function cotizar() {
+    const placa = document.getElementById('cotPlaca').value.trim();
+    const dias  = parseInt(document.getElementById('cotDias').value);
+    const div   = document.getElementById('resultadoCotizacion');
+
+    if (!placa || isNaN(dias) || dias < 1) {
+      div.className = 'text-sm text-red-400'; div.textContent = 'Ingresa placa y días válidos.';
+      div.classList.remove('hidden'); return;
+    }
+
+    try {
+      const res  = await fetch(`${API}/${placa}/cotizar?dias=${dias}`);
+      const data = await res.json();
+      if (!res.ok) { div.innerHTML = `<p class="text-red-400">✘ ${data.error}</p>`; div.classList.remove('hidden'); return; }
+
+      div.classList.remove('hidden');
+      div.innerHTML = `
+        <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 space-y-2">
+          <p class="font-display font-700 text-amber-400 text-base">${data.descripcion}</p>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-white/70">
+            <span>Tipo</span>          <span class="text-white">${labelTipo(data.tipo)}</span>
+            <span>Tarifa/día</span>    <span class="text-white">$${fmt(data.tarifaDiaria)}</span>
+            <span>Días</span>          <span class="text-white">${data.dias}</span>
+            ${data.tipoSeguro ? `<span>Seguro</span><span class="text-white">${data.tipoSeguro}</span>` : ''}
+            ${data.seguroMensual ? `<span>Seguro/mes</span><span class="text-white">$${fmt(data.seguroMensual)}</span>` : ''}
+            ${data.requiereInspeccion !== undefined ? `<span>Inspección</span><span class="${data.requiereInspeccion ? 'text-red-400':'text-green-400'}">${data.requiereInspeccion ? 'Requerida':'No requerida'}</span>` : ''}
+          </div>
+          <div class="border-t border-amber-500/30 pt-2 flex justify-between items-center">
+            <span class="text-xs text-white/50">Costo Total</span>
+            <span class="text-xl font-display font-800 text-amber-400">$${fmt(data.costoTotal)}</span>
+          </div>
+        </div>`;
+    } catch { div.innerHTML = '<p class="text-red-400">✘ Sin conexión al backend.</p>'; div.classList.remove('hidden'); }
+  }
+
+  // ── VER DETALLE ─────────────────────────────────────────────
+  function verDetalle(v) {
+    const extra = v.tipo === 'AUTOMOVIL'   ? `<div class="flex justify-between"><span class="text-white/50">Puertas</span><span class="text-white">${v.numeroPuertas}</span></div>` :
+                  v.tipo === 'MOTOCICLETA' ? `<div class="flex justify-between"><span class="text-white/50">Cilindraje</span><span class="text-white">${v.cilindraje} cc</span></div>` :
+                                             `<div class="flex justify-between"><span class="text-white/50">Capacidad</span><span class="text-white">${v.capacidadToneladas} T</span></div>`;
+    document.getElementById('modalContenido').innerHTML = `
+      <div class="space-y-2">
+        <div class="flex justify-between items-center mb-3">
+          <span class="font-display font-700 text-amber-400 text-2xl">${v.placa}</span>
+          <span class="badge-${v.tipo} text-xs font-600 px-2 py-1 rounded-full">${labelTipo(v.tipo)}</span>
+        </div>
+        <div class="space-y-2 bg-white/5 rounded-xl p-4">
+          <div class="flex justify-between"><span class="text-white/50">Marca</span><span class="text-white">${v.marca}</span></div>
+          <div class="flex justify-between"><span class="text-white/50">Modelo</span><span class="text-white">${v.modelo}</span></div>
+          <div class="flex justify-between"><span class="text-white/50">Año</span><span class="text-white">${v.anio}</span></div>
+          <div class="flex justify-between"><span class="text-white/50">Precio Base</span><span class="text-white">$${fmt(v.precioBase)}</span></div>
+          <div class="flex justify-between"><span class="text-white/50">Tarifa/día</span><span class="text-amber-400 font-700">$${fmt(calcularTarifa(v))}</span></div>
+          ${extra}
+        </div>
+      </div>`;
+    document.getElementById('modal').classList.remove('hidden');
+  }
+
+  function cerrarModal() { document.getElementById('modal').classList.add('hidden'); }
+  document.getElementById('modal').addEventListener('click', e => { if(e.target===e.currentTarget) cerrarModal(); });
+
+  // ── FEEDBACK ────────────────────────────────────────────────
+  function mostrarFeedback(msg, ok) {
+    const el = document.getElementById('feedback');
+    el.textContent = msg;
+    el.className = `text-sm rounded-lg px-3 py-2 text-center ${ok ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 4000);
+  }
+</script>
+</body>
+</html>
